@@ -1,16 +1,24 @@
-from tkinter import *
-from tkinter import messagebox
 
-root = Tk()
+from picamera import PiCamera
+import numpy as np
+import cv2
+# 创建相机对象
+camera = PiCamera()
 
-btn01 = Button(root)
-btn01["text"] = "Portable EL Members"
-btn01.pack()
+# 设置分辨率
 
-def members_name(e):
-    messagebox.showinfo("Members","Yixin Lu")
+camera.resolution = (512, 512)
 
-btn01.bind("<Button-1>",members_name)
+# camera.iso = 1000
+# camera.shutter_speed = 100000
+camera.exposure_mode = 'auto'
+# 创建一个numpy数组来保存图像
+image = np.empty((camera.resolution[1], camera.resolution[0], 3), dtype=np.uint8)
 
-root.mainloop()
+# 拍摄一张BGR格式的照片
+camera.capture(image, 'bgr')
+
+# 将图像存储为文件
+cv2.imwrite('image.jpg', image)
+
 
