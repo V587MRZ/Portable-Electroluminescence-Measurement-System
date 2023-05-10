@@ -7,9 +7,8 @@ from tkinter import *
 from tkinter import ttk
 from PIL import Image
 from PIL import ImageTk
-import webbrowser
 
-from picamera import PiCamera
+import picamera 
 import time
 import numpy as np
 import cv2
@@ -67,12 +66,16 @@ class Application(Frame):
 
         # Create the exit button
         self.btnQuit = Button(self, text="Quit", height=2, width=26,
-                              font=(10),command=root.destroy)
+                              font=(10),command=root.destroy)\
+                              
+        self.camera = Button(self, text="Test Camera", height=2, width=26,
+                              font=(10),command=self.camera_preview)
 
         # Use Grid Geometry Manager to place widgets
         self.label01.grid(column=0,row=0,columnspan=3,pady=40)
         self.btnStart.grid(column=2,row=5,columnspan=2,pady=20)
-        self.btnQuit.grid(column=2,row=6,columnspan=2,sticky=S,pady=20)
+        self.camera.grid(column=2,row=6,columnspan=2)
+        self.btnQuit.grid(column=2,row=7,columnspan=2,sticky=N)
         self.OptM.grid(column=3,row=1,columnspan=2)
         Label(self, text="Operation Mode: ").grid(column=2,row=1,sticky=W,pady=20)
         self.entry_pairs.grid(column=3,row=2)
@@ -87,7 +90,7 @@ class Application(Frame):
               ", Zhengdao Zhou, Bhargav Ashok, Balaji R, Andrew Leong",
               fg="Grey", font=("Times", 8)).grid(column=0,row=7,sticky=W)
         
-        self.rowconfigure(6,weight=1)
+        self.rowconfigure(7,weight=1)
 
 
     def Entry_able(self,root):
@@ -104,16 +107,27 @@ class Application(Frame):
     def Start(self):
         global photo_diff
         if self.OperationMode.get() == "Auto":
-            capture_and_diff(wait_time=1, iso=800)
+            capture_and_diff()
         else:
             capture_and_diff(num_photos=int(self.entry_pairs.get()), 
-                                iso=int(self.entry_iso.get()), wait_time=1, 
+                                iso=int(self.entry_iso.get()), 
                                 resolution=eval(self.entry_resolution.get()))
         photo_diff = Image.open("average_diff_image.jpg")
         photo_diff = ImageTk.PhotoImage(photo_diff.resize((500, 300)))
         self.label02["image"]=photo_diff
         self.label02.grid(column=0, row=1,columnspan=2,rowspan=6,pady=20)
-
+    
+    def camera_preview(self):
+        with picamera.PiCamera() as camera:
+            # 设置预览分辨率
+            camera.resolution = (500, 300)
+            # 打开预览
+            camera.start_preview(fullscreen=False, window=(7,130,500,300))
+            # 延时
+            time.sleep(5)
+            # 关闭预览
+            camera.stop_preview()
+            
 
 
 if __name__ == "__main__":
