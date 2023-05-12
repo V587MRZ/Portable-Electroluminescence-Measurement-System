@@ -4,7 +4,7 @@ from time import sleep
 import numpy as np
 import cv2
 import RPi.GPIO as GPIO
-from io import BytesIO
+import math
 
 
 def capture_and_diff(
@@ -66,7 +66,7 @@ def capture_and_diff(
 
         # # Convert to grayscale
         # gray1 = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
-        cv2.imwrite('gray1.jpg', gray1)
+        cv2.imwrite('gray1.png', gray1)
         # 等待一段时间
 
         # 拍摄第二张照片
@@ -76,7 +76,7 @@ def capture_and_diff(
         print("the", i, "picture, power on")
         # Convert YUV data to grayscale using cv2.cvtColor
         gray2 = cv2.cvtColor(yuv_data, cv2.COLOR_YUV2GRAY_I420)
-        cv2.imwrite('gray2.jpg', gray2)
+        cv2.imwrite('gray2.png', gray2)
 
         # 计算两张照片的差异图像
         diff_image = cv2.absdiff(gray1, gray2)
@@ -84,8 +84,10 @@ def capture_and_diff(
         # 将差异图像叠加到累加器中
         diff_accumulator += diff_image.astype(np.float32)
     # 计算平均差异图像
+    scale = math.floor(255/np.max(diff_accumulator))
+    diff_accumulator = diff_accumulator * scale
     average_diff_image = (diff_accumulator / num_photos).astype(np.uint8)
-    cv2.imwrite("average_diff_image.jpg", average_diff_image)
+    cv2.imwrite("average_diff_image.png", average_diff_image)
 
     # 在屏幕上显示图像
     # cv2.imshow("Average Diff Image", average_diff_image)
